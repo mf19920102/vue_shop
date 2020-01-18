@@ -7,20 +7,24 @@
         <img src="../assets/logo.png" />
       </div>
 
-      <!--登录表单区-->
-      <el-form class="login_form" :model="loginForm">
-        <el-form-item>
+      <!--登录表单区 ref="loginFormRef" 为表单实例对象-->
+      <el-form ref="loginFormRef" class="login_form" :model="loginForm" :rules="loginRules">
+        <el-form-item prop="username">
           <!--用户名-->
           <el-input v-model="loginForm.username" prefix-icon="iconfont icon-user"></el-input>
         </el-form-item>
         <!--密码-->
-        <el-form-item>
-          <el-input type="password" v-model="loginForm.password" prefix-icon="iconfont icon-3702mima"></el-input>
+        <el-form-item prop="password">
+          <el-input
+            type="password"
+            v-model="loginForm.password"
+            prefix-icon="iconfont icon-3702mima"
+          ></el-input>
         </el-form-item>
         <!--按钮-->
         <el-form-item class="btns">
-          <el-button type="primary">登录</el-button>
-          <el-button type="info">重置</el-button>
+          <el-button type="primary" @click="login">登录</el-button>
+          <el-button type="info" @click="resetLoginForm">重置</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -29,16 +33,54 @@
 
 <script>
 export default {
-  data(){
-    return{
+  data() {
+    return {
       // 登录表单数据
-      loginForm:{
-          username:'',
-          password:''
+      loginForm: {
+        username: "admin",
+        password: "123456"
+      },
+      // 表单验证规则
+      loginRules: {
+        // 验证用户名是否合法
+        username: [
+          { required: true, message: "请输入用户名", trigger: "blur" },
+          { min: 3, max: 10, message: "长度在 3 到 10 个字符", trigger: "blur" }
+        ],
+        password: [
+          { required: true, message: "请输入密码", trigger: "blur" },
+          { min: 3, max: 10, message: "长度在 3 到 10 个字符", trigger: "blur" }
+        ]
       }
     };
+  },
+  methods: {
+    resetLoginForm() {
+      // 调用表单引用对象方法重置表单
+      this.$refs.loginFormRef.resetFields();
+    },
+    login() {
+      // 提交时表单验证，loginRules中的验证都通过后valid的值为true，否则为false
+      this.$refs.loginFormRef.validate(async valid => {
+        if (!valid) {
+          return;
+        }
+        // 登录接口
+        // 把返回数据的data结构复制到resp中
+        const {data:resp} =await this.$http.post('login',this.loginForm);
+        if(200!=resp.meta.status){
+            this.$message.error('登录失败');
+            return;
+        }
+        this.$message.success('登录成功');
+        // 保存token到sessionstorage中
+        window.sessionStorage.setItem("token",resp.data.token);
+        // 跳转到主页
+        this.$router.push('/home')
+
+      });
+    }
   }
-  
 };
 </script>
 <style lang="less" scoped>
