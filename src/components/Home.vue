@@ -12,13 +12,13 @@
     <!--main区域-->
     <el-container>
       <!--左侧导航栏区-->
-      <el-aside width="240px">
-        <el-menu active-text-color="#409EFF">
+      <el-aside width="260px">
+        <el-menu active-text-color="#409EFF" :unique-opened="true">
           <!--一级菜单-->
           <el-submenu :index="item.id+''" :key="item.id" v-for="item in menuList">
             <template slot="title">
               <!--图片-->
-              <i class="el-icon-location"></i>
+              <i :class="item.iconImg"></i>
               <span>{{item.authName}}</span>
             </template>
             <!--二级菜单-->
@@ -33,7 +33,10 @@
         </el-menu>
       </el-aside>
       <!--右侧主页区域-->
-      <el-main>Main</el-main>
+      <el-main>
+        <!-- 主页组件路由占位符 -->
+        <router-view></router-view>
+      </el-main>
     </el-container>
   </el-container>
 </template>
@@ -52,6 +55,28 @@ export default {
       window.sessionStorage.clear();
       this.$router.push('/login');
     },
+    // 设置菜单项图标
+    initMenuIcon(){
+      this.menuList.forEach(item=>{
+        if(item.id=='125'){
+          item.iconImg = 'iconfont icon-user';
+        }
+        if(item.id=='103'){
+          item.iconImg = 'iconfont icon-tijikongjian';
+        }
+        if(item.id=='101'){
+          item.iconImg = 'iconfont icon-shangpin';
+        }
+        if(item.id=='102'){
+          item.iconImg = 'iconfont icon-danju';
+        }
+        if(item.id=='145'){
+          item.iconImg = 'iconfont icon-baobiao';
+        }
+        // this.iconList.push(icon);
+      })
+
+    },
     // 获取左侧菜单
     async getMenuList() {
       const { data: resp } =await this.$http.get('menus');
@@ -59,6 +84,7 @@ export default {
         return this.$message.error(resp.meta.msg);
       }
       this.menuList = resp.data;
+      this.initMenuIcon();
     }
   },
   // 页面加载时获取左侧菜单
@@ -91,11 +117,17 @@ export default {
 .el-aside {
   //   background-color: #333744;
   background-color: #fff;
+  .el-menu{
+    border-right: none;
+  }
 }
 .el-main {
   background-color: #eaedf1;
 }
 .homeContainer {
   height: 100%;
+}
+.iconfont{
+  margin-right: 10px;
 }
 </style>
