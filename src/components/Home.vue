@@ -5,7 +5,7 @@
     <el-header>
       <div>
         <img src="../assets/heima.png" />
-        <span>电商后台管理系统</span>
+        <span></span>
       </div>
       <el-button type="info" @click="loginout">退出</el-button>
     </el-header>
@@ -13,7 +13,7 @@
     <el-container>
       <!--左侧导航栏区-->
       <el-aside width="260px">
-        <el-menu active-text-color="#409EFF" :unique-opened="true">
+        <el-menu active-text-color="#409EFF" :default-active="activePath" :unique-opened="true" router>
           <!--一级菜单-->
           <el-submenu :index="item.id+''" :key="item.id" v-for="item in menuList">
             <template slot="title">
@@ -22,7 +22,7 @@
               <span>{{item.authName}}</span>
             </template>
             <!--二级菜单-->
-            <el-menu-item :index="subItem.id+''" :key="subItem.id" v-for="subItem in item.children">
+            <el-menu-item :index="'/'+subItem.path" :key="subItem.id" v-for="subItem in item.children" @click="saveNavPath('/'+subItem.path)">
               <template slot="title">
                 <!--图片-->
                 <i class="el-icon-menu"></i>
@@ -46,7 +46,9 @@ export default {
   data(){
       return{
           // 左侧菜单数据
-          menuList:[]
+          menuList:[],
+          // 当前点击的菜单path
+          activePath:''
       }
   },
   methods: {
@@ -54,6 +56,12 @@ export default {
       // 清空sessionstorage并跳转到login页面
       window.sessionStorage.clear();
       this.$router.push('/login');
+    },
+    // 保存当前点击的菜单的path
+    saveNavPath(path){
+        window.sessionStorage.setItem('activePath',path);
+        this.activePath = path;
+
     },
     // 设置菜单项图标
     initMenuIcon(){
@@ -75,7 +83,6 @@ export default {
         }
         // this.iconList.push(icon);
       })
-
     },
     // 获取左侧菜单
     async getMenuList() {
@@ -90,6 +97,8 @@ export default {
   // 页面加载时获取左侧菜单
   created() {
       this.getMenuList();
+      // 获取当前点击的菜单的path
+       this.activePath = window.sessionStorage.getItem('activePath');
   }
 };
 </script>
