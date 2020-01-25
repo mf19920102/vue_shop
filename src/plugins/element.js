@@ -25,7 +25,9 @@ import
     TableColumn,
     Switch,
     Tooltip,
-    Pagination
+    Pagination,
+    Dialog,
+    MessageBox
 } from 'element-ui'
 
 Vue.use(Button)
@@ -50,5 +52,7 @@ Vue.use(TableColumn)
 Vue.use(Switch)
 Vue.use(Tooltip)
 Vue.use(Pagination)
+Vue.use(Dialog)
 // 把弹框组件挂架在vue原型上,挂载后可以使用this.$message来使用
 Vue.prototype.$message = Message
+Vue.prototype.$confirm = MessageBox.confirm
