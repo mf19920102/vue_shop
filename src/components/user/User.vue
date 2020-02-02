@@ -58,7 +58,12 @@
               ></el-button>
             </el-tooltip>
             <el-tooltip effect="dark" content="权限" placement="top-start" :enterable="false">
-              <el-button type="warning" icon="el-icon-setting" size="mini"></el-button>
+              <el-button
+                @click="rightSetting(scope.row)"
+                type="warning"
+                icon="el-icon-setting"
+                size="mini"
+              ></el-button>
             </el-tooltip>
           </template>
         </el-table-column>
@@ -118,6 +123,28 @@
         <el-button type="primary" @click="updateUser">确 定</el-button>
       </span>
     </el-dialog>
+
+    <!-- 分配权限弹窗 -->
+    <el-dialog @close="clearSelectedRoleId" title="分配权限" :visible.sync="rightSettingDialogVisible" width="50%">
+      <div>
+        <p>用户名称:{{rightUserInfo.username}}</p>
+        <p>当前角色:{{rightUserInfo.role_name}}</p>
+        <p>
+          <el-select v-model="selectedRoleId" clearable placeholder="请选择">
+            <el-option
+              v-for="item in rolesList"
+              :key="item.id"
+              :label="item.roleName"
+              :value="item.id"
+            ></el-option>
+          </el-select>
+        </p>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="rightSettingDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="saveRoleInfo">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -137,8 +164,13 @@ export default {
       // 控制添加用户对话框的显示与隐藏
       addDialogVisible: false,
       editDialogVisible: false,
+      rightSettingDialogVisible: false,
       userList: [],
       userInfo: {},
+      rolesList: [],
+      selectedRoleId: '',
+      // 分配权限时用户信息
+      rightUserInfo: {},
       total: 0,
       // 获取用户列表请求参数
       queryInfo: {
@@ -155,7 +187,7 @@ export default {
         email: '',
         mobile: ''
       },
-      breadcrumbList:[],
+      breadcrumbList: [],
       // 表单验证规则
       addFormRules: {
         username: [
@@ -265,13 +297,45 @@ export default {
           if (res.meta.status != 200) {
             return this.$message.error('删除失败');
           }
-          this.queryInfo.pagenum=1;
+          this.queryInfo.pagenum = 1;
           this.getUserList();
-          return this.$message.success('删除成功');;
+          return this.$message.success('删除成功');
         })
         .catch(() => {
           return this.$message.info('删除已取消');
         });
+    },
+    // 分配权限
+    async rightSetting(user) {
+      this.rightSettingDialogVisible = true;
+      this.rightUserInfo = user;
+      // 获取角色列表
+      const { data: res } = await this.$http.get('roles');
+      if (res.meta.status != 200) {
+        return this.$message.error('获取角色列表失败');
+      }
+      this.rolesList = res.data;
+    },
+    // 保存角色授权
+    async saveRoleInfo() {
+      if (!this.selectedRoleId) {
+        return this.$message.error('请选择角色');
+      }
+      const { data: res } = await this.$http.put(
+        `users/${this.rightUserInfo.id}/role`,
+        {
+          rid: this.selectedRoleId
+        }
+      );
+      if(res.meta.status!=200){
+          return this.$message.error('更新角色失败');
+      }
+      this.$message.success('更新角色成功');
+      this.getUserList();
+      this.rightSettingDialogVisible = false;
+    },
+    clearSelectedRoleId(){
+      this.selectedRoleId = '';
     }
   },
   created() {
