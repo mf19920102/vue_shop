@@ -3,13 +3,13 @@
   <div>
     <el-breadcrumb separator-class="el-icon-arrow-right">
       <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
-      <el-breadcrumb-item>活动管理</el-breadcrumb-item>
-      <el-breadcrumb-item>活动列表</el-breadcrumb-item>
-      <el-breadcrumb-item>活动详情</el-breadcrumb-item>
+      <el-breadcrumb-item>用户管理</el-breadcrumb-item>
+      <el-breadcrumb-item>用户列表</el-breadcrumb-item>
     </el-breadcrumb>
     <!-- 卡片视图区 -->
     <el-card class="box-card">
       <!-- 搜索区 -->
+      <!-- el-row为layout布局 span：指定栅格占据的列数 gutter：栅格间隔 -->
       <el-row :gutter="20">
         <el-col :span="7">
           <el-input
@@ -126,7 +126,6 @@ export default {
   data() {
     // 自定义邮箱校验规则
     var emailCheck = (rule, value, callback) => {
-      alert;
       // 校验通过
       if (value.indexOf('@qq.com') > 0 || value.indexOf('@163.com') > 0) {
         return callback();
@@ -156,6 +155,7 @@ export default {
         email: '',
         mobile: ''
       },
+      breadcrumbList:[],
       // 表单验证规则
       addFormRules: {
         username: [
