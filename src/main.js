@@ -8,11 +8,13 @@ import './assets/css/global.css'
 import './assets/fonts/iconfont.css'
 // 导入axios
 import axios from 'axios'
+// table-tree插件
+import ZkTable from 'vue-table-with-tree-grid'
 
 // 设置根路径
 axios.defaults.baseURL = 'http://127.0.0.1:8888/api/private/v1/'
 // axios请求拦截器，用于设置header
-axios.interceptors.request.use(config=>{
+axios.interceptors.request.use(config => {
   // Authorization对应header中的key Authorization:jhasdonddaa
   config.headers.Authorization = window.sessionStorage.getItem('token');
   return config;
@@ -21,6 +23,8 @@ axios.interceptors.request.use(config=>{
 Vue.prototype.$http = axios
 
 Vue.config.productionTip = false
+// 注册table-tree插件
+Vue.component('tree-table', ZkTable)
 
 new Vue({
   router,
