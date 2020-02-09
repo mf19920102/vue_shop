@@ -27,3 +27,7 @@ body,
 .el-pagination{
     margin-top: 15px;
 }
+/* 解决element ui 2.13版本中数据过多沾满全屏问题 */
+.el-cascader-menu{
+    height: 240px;
+}
