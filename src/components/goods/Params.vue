@@ -28,12 +28,39 @@
         <el-tab-pane label="动态参数" name="many">
           <el-button type="primary" :disabled="isDisabled" @click="dialogVisible=true">添加参数</el-button>
           <el-table :data="manyTabData" border stripe>
+            <!-- 展开行 -->
+            <el-table-column type="expand">
+              <template slot-scope="scope">
+                <el-tag
+                  closable
+                  @close="deleteParamAttribute"
+                  v-for="(item,i) in scope.row.attr_vals"
+                  :key="i"
+                >{{item}}</el-tag>
+                <!-- 输入文本框 -->
+                <el-input
+                  v-if="inputVisible"
+                  v-model="inputValue"
+                  ref="saveTagInput"
+                  size="small"
+                  @keyup.enter.native="handleInputConfirm"
+                  @blur="handleInputConfirm"
+                ></el-input>
+                <!-- 按钮 -->
+                <el-button v-else class="button-new-tag" size="small" @click="showInput">+ New Tag</el-button>
+              </template>
+            </el-table-column>
             <el-table-column type="index"></el-table-column>
             <el-table-column label="参数名称" prop="attr_name"></el-table-column>
             <el-table-column label="操作">
-              <template>
+              <template slot-scope="scope">
                 <el-button type="primary" icon="el-icon-edit" size="mini">编辑</el-button>
-                <el-button type="danger" icon="el-icon-delete" size="mini">删除</el-button>
+                <el-button
+                  type="danger"
+                  icon="el-icon-delete"
+                  size="mini"
+                  @click="deleteParam(scope.row.attr_id)"
+                >删除</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -44,9 +71,14 @@
             <el-table-column type="index"></el-table-column>
             <el-table-column label="参数名称" prop="attr_name"></el-table-column>
             <el-table-column label="操作">
-              <template>
+              <template slot-scope="scope">
                 <el-button type="primary" icon="el-icon-edit" size="mini">编辑</el-button>
-                <el-button type="danger" icon="el-icon-delete" size="mini">删除</el-button>
+                <el-button
+                  type="danger"
+                  icon="el-icon-delete"
+                  size="mini"
+                  @click="deleteParam(scope.row.attr_id)"
+                >删除</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -105,7 +137,11 @@ export default {
             trigger: 'blur'
           }
         ]
-      }
+      },
+      // 控制输入文本框与按钮的切换显示
+      inputVisible:false,
+      // 文本框中输入的内容
+      inputValue:''
     };
   },
   methods: {
@@ -151,6 +187,12 @@ export default {
       } else {
         this.onlyTabData = res.data;
       }
+
+      // 获取每个参数对应的值
+      res.data.forEach(item => {
+        item.attr_vals = item.attr_vals ? item.attr_vals.split(' ') : [];
+      });
+      console.log(res.data);
     },
     // 添加对话框关闭事件
     addDialogClosed() {
@@ -179,7 +221,36 @@ export default {
         // 重新加载数据
         this.getParamsList();
       });
-    }
+    },
+    async deleteParam(id) {
+      this.$confirm('是否确定删除?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          this.doDelete(id);
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });
+        });
+    },
+    async doDelete(id) {
+      const { data: res } = await this.$http.delete(
+        `categories/${this.categoryId}/attributes/` + id
+      );
+      if (res.meta.status != 200) {
+        return this.$message.error('删除参数失败');
+      }
+      this.$message.success('删除成功');
+      // 重新加载数据
+      this.getParamsList();
+    },
+    // 删除参数下边的属性
+    deleteParamAttribute() {}
   },
   computed: {
     // 如果没有选择到第三级参数菜单，那么按钮被禁用
@@ -208,5 +279,8 @@ export default {
 <style lang="less" scoped>
 .cat_opt {
   margin: 15px 0;
+}
+.el-tag {
+  margin: 10px;
 }
 </style>
