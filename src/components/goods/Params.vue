@@ -39,15 +39,21 @@
                 >{{item}}</el-tag>
                 <!-- 输入文本框 -->
                 <el-input
-                  v-if="inputVisible"
-                  v-model="inputValue"
+                  class="input_new_tag"
+                  v-if="scope.row.inputVisible"
+                  v-model="scope.row.inputValue"
                   ref="saveTagInput"
                   size="small"
-                  @keyup.enter.native="handleInputConfirm"
-                  @blur="handleInputConfirm"
+                  @keyup.enter.native="handleInputConfirm(scope.row)"
+                  @blur="handleInputConfirm(scope.row)"
                 ></el-input>
                 <!-- 按钮 -->
-                <el-button v-else class="button-new-tag" size="small" @click="showInput">+ New Tag</el-button>
+                <el-button
+                  v-else
+                  class="button-new-tag"
+                  size="small"
+                  @click="showInput(scope.row)"
+                >+ New Tag</el-button>
               </template>
             </el-table-column>
             <el-table-column type="index"></el-table-column>
@@ -138,10 +144,8 @@ export default {
           }
         ]
       },
-      // 控制输入文本框与按钮的切换显示
-      inputVisible:false,
-      // 文本框中输入的内容
-      inputValue:''
+      inputVisible: false,
+      inputValue: ''
     };
   },
   methods: {
@@ -181,18 +185,21 @@ export default {
       if (res.meta.status != 200) {
         return this.$message.error('获取参数列表失败');
       }
+
+      // 获取每个参数对应的值
+      res.data.forEach(item => {
+        item.attr_vals = item.attr_vals ? item.attr_vals.split(' ') : [];
+        // 新增额外属性：控制文本与按钮的显示以及文本框的值
+        item.inputVisible = false;
+        item.inputValue = '';
+      });
+
       // 判断数据类型
       if (this.activeName == 'many') {
         this.manyTabData = res.data;
       } else {
         this.onlyTabData = res.data;
       }
-
-      // 获取每个参数对应的值
-      res.data.forEach(item => {
-        item.attr_vals = item.attr_vals ? item.attr_vals.split(' ') : [];
-      });
-      console.log(res.data);
     },
     // 添加对话框关闭事件
     addDialogClosed() {
@@ -250,7 +257,54 @@ export default {
       this.getParamsList();
     },
     // 删除参数下边的属性
-    deleteParamAttribute() {}
+    deleteParamAttribute() {},
+    // 参数属性添加标签键盘回车和失去焦点事件处理函数
+    handleInputConfirm(row) {
+      //输入内容为空处理
+      if (row.inputValue.trim().length == 0) {
+        row.inputValue = '';
+        row.inputVisible = false;
+        return;
+      }
+
+      // 保存数据
+      if (this.saveAttrVals(row) == '200') {
+        this.$message.success('修改参数项成功！');
+        // 属性值加入到列表中
+        row.attr_vals.push(row.inputValue);
+        row.inputValue = '';
+        row.inputVisible = false;
+      }
+    },
+
+    // 将对 attr_vals 的操作，保存到数据库
+    async saveAttrVals(row) {
+      // 需要发起请求，保存这次操作
+      const { data: res } = await this.$http.put(
+        `categories/${this.categoryId}/attributes/${row.attr_id}`,
+        {
+          attr_name: row.attr_name,
+          attr_sel: row.attr_sel,
+          attr_vals: row.attr_vals.join(' ')
+        }
+      );
+
+      if (res.meta.status !== 200) {
+        return this.$message.error('修改参数项失败！');
+      }
+      return '200';
+    },
+
+    // 参数属性添加按钮点击事件
+    showInput(row) {
+      // 点击按钮切换为文本框
+      row.inputVisible = true;
+      // 让文本框自动获得焦点
+      // $nextTick 方法的作用，就是当页面上元素被重新渲染之后，才会指定回调函数中的代码
+      this.$nextTick(_ => {
+        this.$refs.saveTagInput.$refs.input.focus();
+      });
+    }
   },
   computed: {
     // 如果没有选择到第三级参数菜单，那么按钮被禁用
@@ -282,5 +336,8 @@ export default {
 }
 .el-tag {
   margin: 10px;
+}
+.input_new_tag {
+  width: 120px;
 }
 </style>
