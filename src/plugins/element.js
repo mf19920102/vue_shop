@@ -35,7 +35,10 @@ import
     Cascader,
     Alert,
     Tabs,
-    TabPane
+    TabPane,
+    Step,
+    Steps,
+    Divider
 } from 'element-ui'
 
 Vue.use(Button)
@@ -69,6 +72,9 @@ Vue.use(Cascader)
 Vue.use(Alert)
 Vue.use(Tabs)
 Vue.use(TabPane)
+Vue.use(Step)
+Vue.use(Steps)
+Vue.use(Divider)
 // 把弹框组件挂架在vue原型上,挂载后可以使用this.$message来使用
 Vue.prototype.$message = Message
 Vue.prototype.$confirm = MessageBox.confirm
