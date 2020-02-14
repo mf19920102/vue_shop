@@ -33,7 +33,7 @@
               <template slot-scope="scope">
                 <el-tag
                   closable
-                  @close="deleteParamAttribute"
+                  @close="deleteParamAttribute(i,scope.row)"
                   v-for="(item,i) in scope.row.attr_vals"
                   :key="i"
                 >{{item}}</el-tag>
@@ -74,6 +74,34 @@
         <el-tab-pane label="静态属性" name="only">
           <el-button type="primary" :disabled="isDisabled" @click="dialogVisible=true">添加属性</el-button>
           <el-table :data="onlyTabData" border stripe>
+               <!-- 展开行 -->
+            <el-table-column type="expand">
+              <template slot-scope="scope">
+                <el-tag
+                  closable
+                  @close="deleteParamAttribute(i,scope.row)"
+                  v-for="(item,i) in scope.row.attr_vals"
+                  :key="i"
+                >{{item}}</el-tag>
+                <!-- 输入文本框 -->
+                <el-input
+                  class="input_new_tag"
+                  v-if="scope.row.inputVisible"
+                  v-model="scope.row.inputValue"
+                  ref="saveTagInput"
+                  size="small"
+                  @keyup.enter.native="handleInputConfirm(scope.row)"
+                  @blur="handleInputConfirm(scope.row)"
+                ></el-input>
+                <!-- 按钮 -->
+                <el-button
+                  v-else
+                  class="button-new-tag"
+                  size="small"
+                  @click="showInput(scope.row)"
+                >+ New Tag</el-button>
+              </template>
+            </el-table-column>
             <el-table-column type="index"></el-table-column>
             <el-table-column label="参数名称" prop="attr_name"></el-table-column>
             <el-table-column label="操作">
@@ -173,6 +201,9 @@ export default {
       // 只能选择到三级分类
       if (this.selectedKeys.length != 3) {
         this.selectedKeys = [];
+        // 情况属性数据
+        this.manyTabData = [];
+        this.onlyTabData = [];
         return;
       }
       // 根据分类id和当前参数类别获取属性
@@ -257,7 +288,10 @@ export default {
       this.getParamsList();
     },
     // 删除参数下边的属性
-    deleteParamAttribute() {},
+    deleteParamAttribute(index, row) {
+      row.attr_vals.splice(index, 1);
+      this.saveAttrVals(row);
+    },
     // 参数属性添加标签键盘回车和失去焦点事件处理函数
     handleInputConfirm(row) {
       //输入内容为空处理
@@ -266,15 +300,11 @@ export default {
         row.inputVisible = false;
         return;
       }
-
-      // 保存数据
-      if (this.saveAttrVals(row) == '200') {
-        this.$message.success('修改参数项成功！');
-        // 属性值加入到列表中
-        row.attr_vals.push(row.inputValue);
-        row.inputValue = '';
-        row.inputVisible = false;
-      }
+      this.saveAttrVals(row);
+      // 属性值加入到列表中
+      row.attr_vals.push(row.inputValue);
+      row.inputValue = '';
+      row.inputVisible = false;
     },
 
     // 将对 attr_vals 的操作，保存到数据库
@@ -292,7 +322,7 @@ export default {
       if (res.meta.status !== 200) {
         return this.$message.error('修改参数项失败！');
       }
-      return '200';
+      this.$message.success('修改参数项成功！');
     },
 
     // 参数属性添加按钮点击事件
