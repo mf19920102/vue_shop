@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import { Button } from 'element-ui'
+import { Button, Upload } from 'element-ui'
 // 导入element-ui需要的组件
 import { Form,FormItem} from 'element-ui'
 import { Input} from 'element-ui'
@@ -38,7 +38,9 @@ import
     TabPane,
     Step,
     Steps,
-    Divider
+    Divider,
+    Checkbox,
+    CheckboxGroup
 } from 'element-ui'
 
 Vue.use(Button)
@@ -75,6 +77,9 @@ Vue.use(TabPane)
 Vue.use(Step)
 Vue.use(Steps)
 Vue.use(Divider)
+Vue.use(Checkbox)
+Vue.use(CheckboxGroup)
+Vue.use(Upload)
 // 把弹框组件挂架在vue原型上,挂载后可以使用this.$message来使用
 Vue.prototype.$message = Message
 Vue.prototype.$confirm = MessageBox.confirm

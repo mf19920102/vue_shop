@@ -10,6 +10,12 @@ import './assets/fonts/iconfont.css'
 import axios from 'axios'
 // table-tree插件
 import ZkTable from 'vue-table-with-tree-grid'
+// 富文本编辑器
+import VueQuillEditor from 'vue-quill-editor'
+// 富文本编辑器需要的样式
+import 'quill/dist/quill.core.css'
+import 'quill/dist/quill.snow.css'
+import 'quill/dist/quill.bubble.css'
 
 // 设置根路径
 axios.defaults.baseURL = 'http://106.13.51.15:8888/api/private/v1/'
@@ -25,6 +31,8 @@ Vue.prototype.$http = axios
 Vue.config.productionTip = false
 // 注册table-tree插件
 Vue.component('tree-table', ZkTable)
+// 祖册富文本编辑器为全局组件
+Vue.use(VueQuillEditor, /* { default global options } */)
 
 // 全局时间过滤器
 Vue.filter('dateFormat', function(originVal) {
